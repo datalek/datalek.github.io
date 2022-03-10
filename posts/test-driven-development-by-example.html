@@ -1,0 +1,92 @@
+<!doctype html>
+<html class="no-js" lang>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="description" content>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Test Driven Development By Example</title>
+        <link rel="stylesheet" href="../css/style.css" />
+        <link rel="stylesheet" href="../css/code-light.css" />
+        <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+        <!-- Place favicon.ico in the root directory -->
+    </head>
+    <body>
+        <header>
+            <div>
+                <h1>Datalek's notes</h1>
+                <p>These are just my notes .. probably you shouldn't be here ..</p>
+            </div>
+            <nav>
+                <a href="../">Home</a>
+                <!-- <a href="/about.html">About</a>     -->
+                <!-- <a href="/contact.html">Contact</a> -->
+                <a href="../posts.html">Posts</a>
+            </nav>
+        </header>
+
+        <main>
+            <div id="post">
+    <h2>Test Driven Development By Example</h2>
+    <div><p>I read the <em>Test Driven Development By Example</em> book, I put here my take-home messages.</p>
+<h3 id="the-general-tdd-cycles">The general TDD cycles</h3>
+<p>The TDD cycles go as follows:</p>
+<ol type="1">
+<li><strong>Red</strong>: Write a little test that doesn’t work and perhaps doesn’t even compile at first.</li>
+<li><strong>Green</strong>: Make the test work quickly, committing whatever “bad code” is necessary to get the green color.</li>
+<li><strong>Refactor</strong>: Eliminate all the duplication in merely getting the test to work.</li>
+</ol>
+<p>Red, green, refactor; the TDD mantra.</p>
+<h3 id="working-backward">Working backward</h3>
+<p>When you write a test, imagine the perfect interface. Tell yourself a story about how the operation will look from the outside. The story won’t always come true, but you increase the chance to get the best solution for the “client” starting from the best-possible API and working backward.</p>
+<h3 id="the-todo-list">The TODO list</h3>
+<blockquote>
+<p>The more things I knew might need to be done, the less attention I had for what I was doing - Test Driven Development By Example</p>
+</blockquote>
+<p>This simple technique really helps me, just have a file, a piece of paper, whatever you prefer, where put the stuff you what to do but you can’t do now because you need to focus on the current task. I’m using a file named <code>TODOs.md</code>. Amazing how such a simple technique could leverage your way to work.</p>
+<h3 id="test-first">Test first</h3>
+<p>When you should write your tests? Before you write the code that is to be tested. This is strictly correlated to the “no time for testing” death spiral. More stress implies fewer tests, more tests imply less stress. So start with tests to get no stress.</p>
+<figure>
+<img src="../images/no-time-for-testing.png#responsive" title="no time for testing" alt="no time for testing" /><figcaption aria-hidden="true">no time for testing</figcaption>
+</figure>
+<h3 id="code-that-isnt-tested-doesnt-work">Code that isn’t tested doesn’t work</h3>
+<p>The assumption is: Untested code doesn’t work, remind this assumption when you ask yourself if you have to test or not a condition.</p>
+<h3 id="how-do-you-leave-a-programming-session">How do you leave a programming session</h3>
+<p>When you are programming alone leave the last test broken. Is a simple way to know where to start when you come back. When you are programming in a team leave all of the tests running, you need to start from a place of confidence and certainty.</p>
+<h3 id="what-dont-you-have-to-test">What don’t you have to test?</h3>
+<blockquote>
+<p>You’ll have to decide, from experience and reflection, about how many tests you want to write. - Test Driven Development By Example</p>
+</blockquote>
+<p>There isn’t a perfect fit answer, you have to find the one that fits well for yourself. In general, don’t test the code you didn’t write unless you have a good reason.</p>
+<h3 id="how-do-you-know-if-you-have-good-tests">How do you know if you have good tests?</h3>
+<p>In my opinion, a good test suite must be: Fast and simple to run, strong to the refactors or evolution, and helpful to figure out why something went wrong.</p>
+<p>In the book are described some characteristics that suggest a design problem;</p>
+<ul>
+<li><strong>Long setup code</strong>: If you have to write a hundred lines of code for one simple assertion, then something is wrong. Split the object into smaller ones.</li>
+<li><strong>Long running tests</strong>: Tests that take a lot of time to be executed won’t run often, so they have a high chance to be broken because of the rare execution. Moreover, they suggest a design problem, should be easy testing the bits and pieces of the application.</li>
+<li><strong>Fragile tests</strong>: Tests that break unexpectedly suggest a bad decoupling, one part of the application is unexpectedly affecting another part. Decouple the parts, either by breaking the connection or by bringing the two parts together.</li>
+</ul>
+<h3 id="code-for-tomorrow-design-for-today">Code for tomorrow, design for today</h3>
+<blockquote>
+<p>Paradox: by not considering the future of your code, you make your code much more likely adaptable in the future. - Test Driven Development By Example</p>
+</blockquote>
+<p>By coding only what you need for the tests and removing the duplication you improve the chance to get a design that fits perfectly the current requirements and that is prepared for future evolution. Try to solve the problem you have today, not the one you MAY have tomorrow. TDD leaves you with strong confidence about your code, so you can refactor and extend your code without anxiety.</p>
+<h3 id="how-many-tests-should-you-write">How many tests should you write?</h3>
+<blockquote>
+<p>Write tests until fear is transformed into boredom - Test Driven Development By Example</p>
+</blockquote>
+<p>The number of tests depends on the level of confidence you need in your code, which depends on the purpose of the code.</p>
+<h3 id="when-should-you-delete-tests">When should you delete tests?</h3>
+<blockquote>
+<p>Given two tests that are redundant with respect to confidence and communication, delete the least useful of the two. - Test Driven Development By Example</p>
+</blockquote>
+<p>Given two tests that execute the same code, keep both if they show a different scenario. Never delete a test if it reduces the confidence in the behavior of the system.</p></div>
+</div>
+
+        </main>
+
+        <footer>
+            <p>Copyright rakhov - 2021</p>
+        </footer>
+    </body>
+</html>
