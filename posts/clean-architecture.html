@@ -1,0 +1,117 @@
+<!doctype html>
+<html class="no-js" lang>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="description" content>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Notes on Clean Architecture</title>
+        <link rel="stylesheet" href="../css/style.css" />
+        <link rel="stylesheet" href="../css/code-light.css" />
+        <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+        <!-- Place favicon.ico in the root directory -->
+    </head>
+    <body>
+        <header>
+            <div>
+                <h1>Datalek's notes</h1>
+                <p>The following bytes are just my notes, unless I sent you the link you are probably in the wrong place.</p>
+            </div>
+            <nav>
+                <a href="../">Home</a>
+                <!-- <a href="/about.html">About</a>     -->
+                <!-- <a href="/contact.html">Contact</a> -->
+                <a href="../posts.html">Posts</a>
+            </nav>
+        </header>
+
+        <main>
+            <div id="post">
+    <h2>Notes on Clean Architecture</h2>
+    <div><p>The author Robert Cecil Martin (also known as Uncle Bob) has a huge experience, he had been writing code for more than half a century (from 1964), building many systems. I’ve read his book <strong>Clean Architecture</strong> and these are my notes about it.</p>
+<h3 id="measure-of-design-quality">Measure of design quality</h3>
+<p>The measure of design quality is simply the measure of the effort required to meet the needs of the customer. If that effort is low and stays low throughout the lifetime of the system, the design is good. If that effort grows with each new release, the design is bad.</p>
+<h3 id="how-to-create-a-good-design">How to create a good design?</h3>
+<p>The key is to isolate the code you want to protect. But protect from what? Most of the time I want to protect it from <em>frameworks</em>, <em>stakeholders</em>, <em>external systems</em>, <em>other teams</em>, and <em>users</em>. By doing that, the code you love is kept safe from events you can’t control. With the term <em>isolate</em> I mean that the code you are protecting shouldn’t know about the other code.</p>
+<h3 id="polymorphism-to-reverse-source-code-dependency">Polymorphism to reverse source code dependency</h3>
+<p>The polymorphism is the “trick” to use when you need to reverse the code dependency. Let’s say we have two modules: <code>Module-A</code> and <code>Module-B</code>, and the <code>Module-A</code> import the <code>Module-B</code> (Figure 1).</p>
+<figure>
+<img src="../images/1-source-code-dependency.png#responsive" title="Figure 1" alt="Figure 1 Source code dependency" /><figcaption aria-hidden="true">Figure 1 Source code dependency</figcaption>
+</figure>
+<p>The <code>&lt;import&gt;</code> has some implication, e.g. in a compiled language, a change on a file implies also recompiling the files that import that file. Changing <code>Module-B</code> will affect also <code>Module-A</code>. How can we avoid this dependency? Add an abstraction and make the two modules depend on it (Figure 2).</p>
+<figure>
+<img src="../images/1-dependency-inversion.png#responsive" title="Figure 2" alt="Figure 2 Dependency inversion in act" /><figcaption aria-hidden="true">Figure 2 Dependency inversion in act</figcaption>
+</figure>
+<p>The direction of the dependency is determined by the position of the interface. The module that contains the interface is independent from the other one.</p>
+<h3 id="the-clean-architecture">The Clean Architecture</h3>
+<p>The <strong>Clean Architecture</strong> separates the software into layers, and establishes the <strong>The Dependency Rule</strong> between them: <em>Internal layers cannot depend on external layers</em>, which means:</p>
+<blockquote>
+<p>The source code dependencies can only point inward.</p>
+</blockquote>
+<p>Nothing in an inner circle can know anything at all about something in an outer circle, nothing in an outer circle should impact the inner circles.</p>
+<figure>
+<img src="../images/1-clean-architecture.png#responsive#full-width" title="Figure 3" alt="Figure 3 Clean Architecture" /><figcaption aria-hidden="true">Figure 3 Clean Architecture</figcaption>
+</figure>
+<h5 id="entities">Entities</h5>
+<p>This place contains functions and data structures that implement your Enterprise Business Rules, they are what you want to protect more. Ideally, this code can be shared with other applications.</p>
+<h5 id="user-cases">User Cases</h5>
+<p>This layer contains the Application Business Rules, which are actual application-specific. They can’t be shared with other applications. It encapsulates and implements all of the use cases of the system. The user cases are isolated from details like <em>database</em>, <em>UI</em>, and <em>frameworks</em>.</p>
+<h5 id="interface-adapters">Interface Adapters</h5>
+<p>Here lives the code that adapts the data from the format used by use cases and entities, to the format used by some external agent such as the database or the web. If you are using PostgreSQL all the SQL should be placed in the parts of this layer that have to do with the database.</p>
+<h5 id="frameworks-and-drivers">Frameworks and Drivers</h5>
+<p>This should be a thin layer, it contains the glue code that initializes and connects all the parts.</p>
+<h4 id="crossing-boundaries">Crossing Boundaries</h4>
+<p>The Figure 4 shows the controllers and presenters communicating with the use cases which is in an inner layer. The flow of control begins in the <em>Controller</em> and ends with the <em>Presenter</em> passing through the <em>UseCase</em>. The <em>UseCase</em> should call the presenter but it can’t do it directly without breaking <strong>the rule</strong> (code dependencies only point inwards). The problem could be solved using the <em>Dependency Inversion Principle</em>, just use the polymorphism and put the interface in the correct layer.</p>
+<figure>
+<img src="../images/1-crossing-boundaries.png#responsive" title="Figure 4" alt="Figure 4 Crossing Boundaries" /><figcaption aria-hidden="true">Figure 4 Crossing Boundaries</figcaption>
+</figure>
+<h5 id="which-data-crosses-the-boundaries">Which Data crosses the boundaries</h5>
+<blockquote>
+<p>When you pass data across a boundary it is always in the form that is most convenient for the inner circle.</p>
+</blockquote>
+<p>Don’t cheat passing Entity object or database rows, don’t create any data structure that violates the <em>Dependency Rule</em>! Don’t pass the row structure inward across a boundary, it would force an inner circle to know something about an outer circle.</p>
+<h4 id="details-details-details-details">Details, details, details, details</h4>
+<p>Keep details separate from your business logic.</p>
+<p>Database: it’s just an implementation used to move the data back and forth between the surface of the disk and RAM. The organizational structure of data is architecturally significant, the technologies and systems that move data on and off a storage system are not.</p>
+<p>Web: Is like a GUI or an IO device, it is something that has changed and will change again.</p>
+<p>Frameworks: The relationship between you and the framework author is asymmetric, you make a huge commitment to the framework, but the framework author makes no commitment to you. Use frameworks but just don’t couple to them.</p>
+<h2 id="solid">SOLID</h2>
+<p>The solid principles help to arrange functions and data structures into “classes”, and how those “classes” should be interconnected.</p>
+<h4 id="srp-the-single-responsibility-principle">[SRP] The Single Responsibility Principle</h4>
+<p>This principle might be the least well understood, is too easy for programmers to assume that it means that every module should do just one thing, but this is a misinterpretation. Historical the SRP has been described this way:</p>
+<blockquote>
+<p>A module has one, and only one, reason to change.</p>
+</blockquote>
+<p>Software systems are changed to satisfy users and stakeholders; those users and stakeholders are the <em>“reason to change”</em> that the principle is talking about. In the book it is rewritten as follows:</p>
+<blockquote>
+<p>A module should be responsible to one, and only one, actor.</p>
+</blockquote>
+<h4 id="ocp-the-open-closed-principle">[OCP] The Open-Closed Principle</h4>
+<blockquote>
+<p>A software artifact should be open for extension but closed for modification. – Bertrand Meyer, Object Oriented Construction</p>
+</blockquote>
+<p>The behavior of software should be extendible without having to modify it, or at least without incurring a high impact of change.</p>
+<h4 id="lsp-the-liskov-substitution-principle">[LSP] The Liskov Substitution Principle</h4>
+<blockquote>
+<p>Any subclass object should be substitutable for the superclass object from which it is derived.</p>
+</blockquote>
+<p>This principle pushes software architects to design by contract, giving them the ability to substitute an implementation with another.</p>
+<h4 id="isp-the-interface-segregation-principle">[ISP] The Interface Segregation Principle</h4>
+<blockquote>
+<p>No code should be forced to depend on methods it does not use.</p>
+</blockquote>
+<p>Don’t create large interfaces with unrelated methods, instead split them into smaller and more specific interfaces so clients will only have to know about methods that are of interest to them.</p>
+<h4 id="dip-the-dependency-inversion-principle">[DIP] The Dependency Inversion Principle</h4>
+<blockquote>
+<p>The code that implements high-level policy should not depend on the code that implements low-level details. Rather, details should depend on policies.</p>
+</blockquote>
+<p>High-level modules should not import anything from low-level modules. Both should depend on abstractions. Abstractions should not depend on details. Details (concrete implementations) should depend on abstractions.</p></div>
+</div>
+
+        </main>
+
+        <footer>
+            <p>Copyright rakhov - 2021</p>
+        </footer>
+    </body>
+</html>
