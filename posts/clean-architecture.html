@@ -54,8 +54,8 @@
 </figure>
 <h5 id="entities">Entities</h5>
 <p>This place contains functions and data structures that implement your Enterprise Business Rules, they are what you want to protect more. Ideally, this code can be shared with other applications.</p>
-<h5 id="user-cases">User Cases</h5>
-<p>This layer contains the Application Business Rules, which are actual application-specific. They can’t be shared with other applications. It encapsulates and implements all of the use cases of the system. The user cases are isolated from details like <em>database</em>, <em>UI</em>, and <em>frameworks</em>.</p>
+<h5 id="use-cases">Use Cases</h5>
+<p>This layer contains the Application Business Rules, which are actual application-specific. They can’t be shared with other applications. It encapsulates and implements all of the use cases of the system. The use cases are isolated from details like <em>database</em>, <em>UI</em>, and <em>frameworks</em>.</p>
 <h5 id="interface-adapters">Interface Adapters</h5>
 <p>Here lives the code that adapts the data from the format used by use cases and entities, to the format used by some external agent such as the database or the web. If you are using PostgreSQL all the SQL should be placed in the parts of this layer that have to do with the database.</p>
 <h5 id="frameworks-and-drivers">Frameworks and Drivers</h5>
