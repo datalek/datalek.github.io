@@ -1,0 +1,162 @@
+<!doctype html>
+<html class="no-js" lang>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="description" content>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Ports and Adapters</title>
+        <link rel="stylesheet" href="../css/style.css" />
+        <link rel="stylesheet" href="../css/code-light.css" />
+        <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+        <!-- Place favicon.ico in the root directory -->
+    </head>
+    <body>
+        <header>
+            <div>
+                <h1>Datalek's notes</h1>
+                <p>The following bytes are just my notes, unless I sent you the link you are probably in the wrong place.</p>
+            </div>
+            <nav>
+                <a href="../">Home</a>
+                <!-- <a href="/about.html">About</a>     -->
+                <!-- <a href="/contact.html">Contact</a> -->
+                <a href="../posts.html">Posts</a>
+            </nav>
+        </header>
+
+        <main>
+            <div id="post">
+    <h2>Ports and Adapters</h2>
+    <div><p>There are many ideas about the architecture of a system, in 2005 Alistair Cockburn introduced the <strong>Ports and Adapters</strong> architecture pattern (<a href="https://web.archive.org/web/20220223211121/https://alistair.cockburn.us/hexagonal-architecture/">1</a>), since then, many variations have emerged, from <strong>Onion Architecture</strong> (<a href="https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/">2</a>) developed by Jeffrey Palermo to <strong>Clean Architecture</strong> (<a href="https://web.archive.org/web/20220421125248/https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html">3</a>) developed by Robert Cecil Martin.</p>
+<p>They are all trying to achieve the same goal: <em>separation of concerns</em>. All of them separate the software into layers, one containing the business rules and the other one containing user and system connectors. Moreover, in all of them, the business rules (internal layer) never depend on the user and system part (external layer).</p>
+<p>In <strong>Ports and Adapters</strong> the external and internal layers interact with each other using <strong>port</strong> and <strong>adapter</strong>.</p>
+<p>A <strong>port</strong> is a protocol about how external entities may interact with the application, the word “port” recalls the “ports” in an operating system. It can be represented using an interface or a typeclass.</p>
+<p>An <strong>adapter</strong> is a component that connects the port with the external entity, in other words, translates the port’s protocol to the protocol that the external entity understands.</p>
+<figure>
+<img src="../images/2-ports-and-adapters.png#responsive" title="Figure 1" alt="Figure 1: Ports and Adapters" /><figcaption aria-hidden="true">Figure 1: Ports and Adapters</figcaption>
+</figure>
+<p>A <strong>port</strong> can have more than one <strong>adapter</strong> and the <strong>Dependency Inversion Principle</strong> should be always honored, which means: the adapter imports the port.</p>
+<p>Although at architectural level all ports and adapters are fundamentally similar, in implementation they can be categorized into two different groups: <strong>primary</strong> (or <strong>driving</strong>) and <strong>secondary</strong> (or <strong>driven</strong>). The distinction between them lies in who triggers or is in charge of the conversation. If the adapter “serves” an actor that drives the application it is a primary adapter, otherwise, if it “serves” an actor that is driven by the application it is a secondary adapter.</p>
+<h3 id="example">Example</h3>
+<p>The following example shows a project that follows the <strong>Ports and Adapters</strong> pattern, keep in mind that there are many different ways to structure it and this is just one of them.</p>
+<p>In the top layer there are three folders and two files:</p>
+<ul>
+<li>The <strong>domain</strong> folder contains the types and pure functions that describe and implement the business rules of the system.</li>
+<li>The <strong>useCases</strong> folder depends on <strong>domain</strong> and it contains the use-cases of the application.</li>
+<li>The <strong>adapters</strong> folder, which is self-explanatory, contains the adapters.</li>
+<li>The <strong>main</strong> file is where the system is initialized.</li>
+<li>The <strong>config</strong> file contains the configuration and how to create it from <code>envs</code>.</li>
+</ul>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">src</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> adapters</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> └── ...</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> domain</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> └── ...</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> useCases</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> └── ...</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> config.ts</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> main.ts</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    </span></code></pre></div>
+<h4 id="domain">Domain</h4>
+<p>This folder contains the most important code; the types/structure of our application, the protocol on how to interact with them (a.k.a. <strong>ports</strong>, usually the driven one), and functions to manipulate these structures. This code doesn’t depend on any other code outside this folder.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">src</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> ...</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> domain</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> └── users</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span>     ├── UserRepository.ts</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span>     └── types.ts</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> ...</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    </span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// file: src/domain/users/UserRepository.ts</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="op">*</span> <span class="im">as</span> TE from <span class="st">&quot;fp-ts/TaskEither&quot;</span><span class="op">;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { User<span class="op">,</span> UserDefinition } from <span class="st">&quot;./types&quot;</span><span class="op">;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>export interface UserRepository {</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  insert<span class="op">:</span> (definition<span class="op">:</span> UserDefinition) <span class="kw">=&gt;</span> TE<span class="op">.</span><span class="at">TaskEither</span><span class="op">&lt;</span>Error<span class="op">,</span> User<span class="op">&gt;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// file: src/domain/users/types.ts</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>interface UserIdBrand {</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">readonly</span> UserId<span class="op">:</span> unique <span class="dt">symbol</span><span class="op">;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="im">export type</span> UserId <span class="op">=</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  string <span class="op">&amp;</span> { _tag<span class="op">:</span> UserIdBrand }</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="im">export type</span> User <span class="op">=</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  { id<span class="op">:</span> UserId</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="op">,</span> firstName<span class="op">:</span> <span class="dt">string</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="op">,</span> lastName<span class="op">:</span> <span class="dt">string</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">,</span> age<span class="op">:</span> <span class="dt">number</span> }</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="im">export type</span> UserDefinition <span class="op">=</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="bu">Omit</span><span class="op">&lt;</span>User<span class="op">,</span> <span class="st">&quot;id&quot;</span><span class="op">&gt;;</span></span></code></pre></div>
+<h4 id="usecases">UseCases</h4>
+<p>This folder contains the use-cases, to me the use-cases are the driving port, they depend only on the code inside the <strong>domain</strong> folder.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">src</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> ...</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> ...</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> useCases</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="ex">└──</span> RegisterUserUseCase.ts</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    </span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// file: src/useCases/RegisterUserUseCase.ts</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="op">*</span> <span class="im">as</span> TE from <span class="st">&quot;fp-ts/TaskEither&quot;</span><span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { GenericError<span class="op">,</span> InvalidInput<span class="op">,</span> makeInvalidInput } from <span class="st">&quot;../domain/DomainError&quot;</span><span class="op">;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { User<span class="op">,</span> UserDefinition } from <span class="st">&quot;../domain/users/types&quot;</span><span class="op">;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { UserRepository } from <span class="st">&quot;../domain/users/UserRepository&quot;</span><span class="op">;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> RegisterUserError <span class="op">=</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> GenericError</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> InvalidInput</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="im">export type</span> RegisterUserUseCase <span class="op">=</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  (definition<span class="op">:</span> UserDefinition) <span class="kw">=&gt;</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  TE<span class="op">.</span><span class="at">TaskEither</span><span class="op">&lt;</span>RegisterUserError<span class="op">,</span> User<span class="op">&gt;</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>export const RegisterUserUseCase <span class="op">=</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  (userRepository<span class="op">:</span> UserRepository)<span class="op">:</span> RegisterUserUseCase <span class="kw">=&gt;</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  (definition) <span class="kw">=&gt;</span> {</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    return TE<span class="op">.</span><span class="fu">left</span>(<span class="fu">makeInvalidInput</span>(<span class="st">&quot;Invalid&quot;</span>))</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<h4 id="adapters">Adapters</h4>
+<p>The adapters folder contains the implementation of the <strong>primary</strong> and <strong>secondary</strong> (also known as <strong>driving</strong> and <strong>driven</strong>) ports. Most of the time I group them in folders based on the technology used to implement them.</p>
+<p>In the example below the <code>http</code> folder contains all the code required to start a server that “<em>exposes</em>” a use-case through an HTTP endpoint.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">src</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> adapters</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> ├── http</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> │   ├── application.ts</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> │   ├── users</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> │   │   ├── codec.ts</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> │   │   └── router.ts</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> │   └── utils.ts</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> └── mongoDB</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span>     └── UserRepository.ts</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> ...</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> ...</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    </span></code></pre></div>
+<h4 id="config-and-main-files">Config and Main files</h4>
+<p>The configuration of the system is inside the <code>config</code> file on the top level, it usually defines the configuration composing the specific-configuration of each adapter and provides a parsing function to <em>create</em> a valid <code>Config</code> from environment variables.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">// file: src/config.ts</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="op">*</span> <span class="im">as</span> E from <span class="st">&quot;fp-ts/Either&quot;</span><span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { HttpConfig } from <span class="st">&quot;./adapters/http/application&quot;</span><span class="op">;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="im">export type</span> Config <span class="op">=</span> {</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  server<span class="op">:</span> HttpConfig</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>export const parseConfig <span class="op">=</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  (envs<span class="op">:</span> <span class="bu">Record</span><span class="op">&lt;</span><span class="dt">string</span><span class="op">,</span> <span class="dt">undefined</span> <span class="op">|</span> <span class="dt">string</span><span class="op">&gt;</span>)<span class="op">:</span> E<span class="op">.</span><span class="at">Either</span><span class="op">&lt;</span><span class="dt">string</span><span class="op">,</span> Config<span class="op">&gt;</span> <span class="kw">=&gt;</span> {</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  }</span></code></pre></div>
+<p>The <code>main</code> file is the entry-point of the application, there all the modules are instantiated and composed to produce the whole application functionalities.</p></div>
+</div>
+
+        </main>
+
+        <footer>
+            <p>Copyright rakhov - 2021</p>
+        </footer>
+    </body>
+</html>
