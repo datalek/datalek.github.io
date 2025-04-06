@@ -1,0 +1,230 @@
+<!doctype html>
+<html class="no-js" lang>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="description" content>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Ports and Adapters (Simplified)</title>
+        <link rel="stylesheet" href="../css/style.css" />
+        <link rel="stylesheet" href="../css/code-light.css" />
+        <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+        <!-- Place favicon.ico in the root directory -->
+    </head>
+    <body>
+        <header>
+            <div>
+                <h1>Datalek's notes</h1>
+                <p>The following bytes are just my notes, unless I sent you the link you are probably in the wrong place.</p>
+            </div>
+            <nav>
+                <a href="../">Home</a>
+                <!-- <a href="/about.html">About</a>     -->
+                <!-- <a href="/contact.html">Contact</a> -->
+                <a href="../posts.html">Posts</a>
+            </nav>
+        </header>
+
+        <main>
+            <div id="post">
+    <h2>Ports and Adapters (Simplified)</h2>
+    <div><p>Today I’m gonna talk again about Ports and Adapters. In the past I’ve already written about <a href="../posts/clean-architecture.html">Clean Architecture</a> and <a href="../posts/ports-and-adapters.html">Ports and Adapters</a>, but today I would like to write about a pragmatic way to follow <strong>Ports and Adapters</strong>, simplifying it even more.</p>
+<h3 id="overview">Overview</h3>
+<figure>
+<img src="../images/4-simplified-ports-and-adapters.png#responsive" title="Figure 1" alt="Figure 1: Ports and Adapters (simplified)" /><figcaption aria-hidden="true">Figure 1: Ports and Adapters (simplified)</figcaption>
+</figure>
+<p>As you can see from the picture we have the following elements:</p>
+<ul>
+<li><strong>Domain</strong>: Is the code to keep decoupled and protected from external entities. Contains types, core logic functions, and ports.</li>
+<li><strong>Ports</strong>: Are the APIs (interfaces) defined within the domain that abstract external dependencies (like databases, emailers).</li>
+<li><strong>Adapters</strong>: Are the concrete implementations of a port, often tied to a specific technology (e.g., Express, DynamoDB, SES).</li>
+</ul>
+<p>Some important notes:</p>
+<ul>
+<li>All the <strong>Ports</strong> stay inside the <strong>Domain</strong>, they are part of it!</li>
+<li>An <strong>Adapter</strong> exists only to implement a <strong>Port</strong>.</li>
+<li>The structure enhances <strong>testability</strong>, as adapters implementing specific ports can easily be replaced with mocks or test doubles.</li>
+<li>Dependencies flow inwards: <strong>Adapters</strong> depend on <strong>Domain Ports</strong>, but the <strong>Domain</strong> must not depend on any specific <strong>Adapter</strong>.</li>
+</ul>
+<h3 id="example">Example</h3>
+<p>Imagine a service that manages users, groups and permissions. This is the structure it could have:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">src</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> adapters</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> ├── aws</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> │   └── ses</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> │       └── email-mailer.ts</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> ├── console</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> │   └── logger.ts</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> ├── express</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> │   ├── app.ts</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> │   └── register-users.ts</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> └── map</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span>     └── users-repository.ts</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> domain</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> ├── email.ts</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> ├── logger.ts</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> └── users.ts</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> config.ts</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> main.ts</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    </span></code></pre></div>
+<p>As you can see <strong>Adapters</strong> are organized by technology first, then potentially by the port they implement. I found this structure coherent with the aims of adapters (create an implementation for a port or a way to interact with it using a <em>specific technology</em>). Moreover, it is super easy to find the right collocation for a new adapter.</p>
+<p><strong>Domain</strong> is simple: each file contains related types, functions (including use cases), and the ports needed by those functions. Use-cases are simply exported functions within the domain files (like <code>registerUser</code> below).</p>
+<p>The <strong>config</strong> and <strong>main</strong> file are the glue of the system. The <strong>main</strong> file is the entry-point of the system, and it initializes all the adapters needed and wires them together. The <strong>config</strong> file typically handles loading and providing configuration values (like API keys, database connection details) needed by adapters during initialization in `main.ts</p>
+<h4 id="and-the-missing-parts-of-ports-and-adapters">And the missing parts of Ports and Adapters?</h4>
+<p>As you already noted there is no explicit <code>use-cases</code> folder and no distinction between primary/secondary ports and adapters. Why?</p>
+<ul>
+<li><strong>Use Cases Folder:</strong> I did not find a consistent advantage in keeping use cases in a separate folder away from the domain types and ports they operate on, especially in moderately sized applications. It often felt like premature complexity. If one domain file becomes too complex, it can then be split as needed. For many projects, placing the use case function directly in the relevant domain file (e.g., <code>registerUser</code> within <code>users.ts</code>) reduced boilerplate and kept related logic physically closer, improving discoverability.</li>
+<li><strong>Primary/Secondary Distinction:</strong> While conceptually useful, the formal distinction rarely impacted the actual implementation structure in a meaningful way for my projects. The direction of interaction (driving vs. driven) was usually clear from the context (e.g., an HTTP handler <em>drives</em> the application, a database repository <em>is driven by</em> the application). Omitting the labels simplified the vocabulary without losing practical clarity.</li>
+</ul>
+<p>This approach prioritizes simplicity and reduces ceremony, which aligns with the “Simple is beautiful” principle.</p>
+<h4 id="domain-code">Domain code</h4>
+<div class="sourceCode" id="cb2"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// file src/domain/users.ts</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { EmailEnv } from <span class="st">'./email.js'</span><span class="op">;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { LoggerEnv } from <span class="st">'./logger.js'</span><span class="op">;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">// UserEnv contains all the ports needed by the user domain functions.</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">export type</span> UserEnv {</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  userRepository<span class="op">:</span> {</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    insert<span class="op">:</span> (definition<span class="op">:</span> UserDefinition) <span class="kw">=&gt;</span> <span class="bu">Promise</span><span class="op">&lt;</span>User<span class="op">&gt;;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="im">export type</span> User {</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Using a branded type </span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="co">// (e.g., type UserId = string &amp; { __brand: 'UserId' })</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="co">// offers more type safety but `string` is used here for simplicity.</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  id<span class="op">:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  firstName<span class="op">:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  lastName<span class="op">:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="co">// the email is string for simplicity</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  email<span class="op">:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  age<span class="op">:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="im">export type</span> UserDefinition <span class="op">=</span> <span class="bu">Omit</span><span class="op">&lt;</span>User<span class="op">,</span> <span class="st">'id'</span><span class="op">&gt;;</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co">// This is a domain function (acting as the use case) that,</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="co">// given the required environment (ports) and a user definition,</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="co">// registers a user.</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>export const registerUser <span class="op">=</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>  (definition<span class="op">:</span> UserDefinition) <span class="kw">=&gt;</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>  <span class="co">// It requires an environment that satisfies UserEnv, EmailEnv and LoggerEnv</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">async</span> (env<span class="op">:</span> UserEnv <span class="op">&amp;</span> EmailEnv <span class="op">&amp;</span> LoggerEnv)<span class="op">:</span> <span class="bu">Promise</span><span class="op">&lt;</span>User<span class="op">&gt;</span> <span class="kw">=&gt;</span> {</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Persist the user using the repository port</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Error handling omitted for brevity</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    const user <span class="op">=</span> await env<span class="op">.</span><span class="at">userRepository</span><span class="op">.</span><span class="fu">insert</span>(definition)<span class="op">;</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    env<span class="op">.</span><span class="at">logger</span><span class="op">.</span><span class="fu">log</span>(<span class="vs">`User inserted with ID: </span><span class="sc">${</span>user<span class="op">.</span><span class="at">id</span><span class="sc">}</span><span class="vs">`</span>)<span class="op">;</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Send a welcome email using the mailer port</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    const email <span class="op">=</span> { to<span class="op">:</span> user<span class="op">.</span><span class="at">email</span><span class="op">,</span> body<span class="op">:</span> <span class="vs">`Welcome, </span><span class="sc">${</span>user<span class="op">.</span><span class="at">firstName</span><span class="sc">}</span><span class="vs">!`</span> }<span class="op">;</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    await env<span class="op">.</span><span class="at">mailer</span><span class="op">.</span><span class="fu">send</span>(email)<span class="op">;</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>    env<span class="op">.</span><span class="at">logger</span><span class="op">.</span><span class="fu">log</span>(<span class="vs">`Welcome email sent to: </span><span class="sc">${</span>user<span class="op">.</span><span class="at">email</span><span class="sc">}</span><span class="vs">`</span>)<span class="op">;</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    return user<span class="op">;</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span></code></pre></div>
+<p><strong>Note:</strong> The <code>Env</code> pattern (e.g. <code>UserEnv</code>) groups the required dependencies (ports) for domain functions, making dependency injection explicit and type-safe.</p>
+<h4 id="adapters-code">Adapters code</h4>
+<div class="sourceCode" id="cb3"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// file src/adapters/express/register-user.ts</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> express from <span class="st">'express'</span><span class="op">;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { RegisterUserBodyCodec } from <span class="st">'./codec.js'</span><span class="op">;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { registerUser } from <span class="st">'../../domain/users.js'</span><span class="op">;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { AppEnv } from <span class="st">'./app.js'</span><span class="op">;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>export const makeRegisterUserHandler <span class="op">=</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  (env<span class="op">:</span> AppEnv) <span class="kw">=&gt;</span> <span class="fu">async</span> (req<span class="op">:</span> express<span class="op">.</span><span class="at">Request</span><span class="op">,</span> res<span class="op">:</span> express<span class="op">.</span><span class="at">Response</span>) <span class="kw">=&gt;</span> {</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// RegisterUserBodyCodec is used here for</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// validating and parsing the incoming request body,</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// often implemented using a library like Zod or io-ts. </span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    const result <span class="op">=</span> RegisterUserBodyCodec<span class="op">.</span><span class="fu">safeParse</span>(req<span class="op">.</span><span class="at">body</span>)<span class="op">;</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">if</span> (result<span class="op">.</span><span class="at">success</span>) {</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>      const user <span class="op">=</span> await <span class="fu">registerUser</span>(result<span class="op">.</span><span class="at">data</span>)(env)<span class="op">;</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>      res<span class="op">.</span><span class="fu">json</span>(user)<span class="op">;</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    } else {</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>      const response <span class="op">=</span> { error<span class="op">:</span> result<span class="op">.</span><span class="at">error</span><span class="op">.</span><span class="at">issues</span> }<span class="op">;</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>      res<span class="op">.</span><span class="fu">status</span>(<span class="dv">400</span>)<span class="op">.</span><span class="fu">json</span>(response)<span class="op">;</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// file src/adapters/express/app.ts</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> express from <span class="st">'express'</span><span class="op">;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { makeRegisterUserHandler } from <span class="st">'./register-users.js'</span><span class="op">;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { LoggerEnv } from <span class="st">'../../domain/logger.js'</span><span class="op">;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { UserEnv } from <span class="st">'../../domain/users.js'</span><span class="op">;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { EmailEnv } from <span class="st">'../../domain/email.js'</span><span class="op">;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { Config } from <span class="st">'../../config.js'</span><span class="op">;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="im">export type</span> AppEnv <span class="op">=</span> LoggerEnv <span class="op">&amp;</span> UserEnv <span class="op">&amp;</span> EmailEnv<span class="op">;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>export const makeApp <span class="op">=</span> (config<span class="op">:</span> Config<span class="op">,</span> env<span class="op">:</span> AppEnv) <span class="kw">=&gt;</span> {</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  const app <span class="op">=</span> <span class="fu">express</span>()<span class="op">;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  const { port } <span class="op">=</span> config<span class="op">.</span><span class="at">server</span><span class="op">;</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  app<span class="op">.</span><span class="fu">use</span>(express<span class="op">.</span><span class="fu">json</span>())<span class="op">;</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  app<span class="op">.</span><span class="fu">post</span>(<span class="st">'/users'</span><span class="op">,</span> <span class="fu">makeRegisterUserHandler</span>(env))<span class="op">;</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  return {</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    start<span class="op">:</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>      app<span class="op">.</span><span class="fu">listen</span>(port<span class="op">,</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        env<span class="op">.</span><span class="at">logger</span><span class="op">.</span><span class="fu">log</span>(<span class="vs">`Example app listening on port </span><span class="sc">${</span>port<span class="sc">}</span><span class="vs">`</span>)<span class="op">;</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>      })<span class="op">;</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// file src/adapters/map/users-repository.ts</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { User<span class="op">,</span> UserEnv } from <span class="st">'../../domain/users.js'</span><span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>export const makeUserRepository <span class="op">=</span> (</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  map<span class="op">:</span> ReadonlyMap<span class="op">&lt;</span>User[<span class="st">'id'</span>]<span class="op">,</span> User<span class="op">&gt;</span> <span class="op">=</span> <span class="kw">new</span> <span class="fu">Map</span>()<span class="op">,</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>)<span class="op">:</span> UserEnv[<span class="st">'userRepository'</span>] <span class="kw">=&gt;</span> {</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  const db <span class="op">=</span> <span class="kw">new</span> <span class="fu">Map</span>(map)<span class="op">;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  return {</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    insert<span class="op">:</span> <span class="fu">async</span> (definition) <span class="kw">=&gt;</span> {</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>      const id <span class="op">=</span> crypto<span class="op">.</span><span class="fu">randomUUID</span>()<span class="op">;</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>      const user <span class="op">=</span> { id<span class="op">,</span> <span class="op">...</span>definition }<span class="op">;</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>      db<span class="op">.</span><span class="fu">set</span>(id<span class="op">,</span> user)<span class="op">;</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>      return user<span class="op">;</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+<h4 id="main-code">Main code</h4>
+<div class="sourceCode" id="cb6"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// file src/main.ts</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { makeUserRepository } from <span class="st">'./adapters/map/users-repository.js'</span><span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { makeLogger } from <span class="st">'./adapters/console/logger.js'</span><span class="op">;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { makeMailer } from <span class="st">'./adapters/aws/ses/email-mailer.js'</span><span class="op">;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { makeApp } from <span class="st">'./adapters/express/app.js'</span><span class="op">;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { loadConfigOrThrow } from <span class="st">'./config.js'</span><span class="op">;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>const config <span class="op">=</span> <span class="fu">loadConfigOrThrow</span>(<span class="bu">process</span><span class="op">.</span><span class="at">env</span>)<span class="op">;</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">// create the adapters</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>const logger <span class="op">=</span> <span class="fu">makeLogger</span>()<span class="op">;</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>const userRepository <span class="op">=</span> <span class="fu">makeUserRepository</span>()<span class="op">;</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>const mailer <span class="op">=</span> <span class="fu">makeMailer</span>(logger)<span class="op">;</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>const env <span class="op">=</span> {</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  userRepository<span class="op">,</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  mailer<span class="op">,</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  logger<span class="op">,</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="co">// create the app</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>const app <span class="op">=</span> <span class="fu">makeApp</span>(config<span class="op">,</span> env)<span class="op">;</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="co">// start the app</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>app<span class="op">.</span><span class="fu">start</span>()<span class="op">;</span></span></code></pre></div>
+<h3 id="final-words">Final Words</h3>
+<p>The <strong>Ports and Adapters</strong> pattern is a powerful tool for decoupling, but like any tool, its value lies in how and when you use it. My pragmatic approach is not about cutting corners, it’s about trimming perceived unnecessary complexity for the sake of clarity and potentially faster delivery <em>in certain contexts</em>.</p>
+<p><strong>Potential Trade-offs:</strong> Be mindful that in very large or complex applications, the lack of explicit use case separation <em>might</em> eventually lead to larger domain files that need refactoring. Similarly, while the primary/secondary distinction might feel like overhead initially, it <em>could</em> provide clarity in systems with many integration points. But I don’t think so so far.</p>
+<p>To my future self: remember that <strong>simplicity scales</strong>. Start simple, apply patterns judiciously, and refactor towards more structure only when the complexity genuinely demands it. It’s all about finding the balance that works for your team, your project’s current scale, and its anticipated evolution.</p>
+<h3 id="useful-link">Useful Link</h3>
+<p>You can find an example in the following <a href="https://github.com/datalek/ports-and-adapters/tree/typescript-node">repository</a>.</p></div>
+</div>
+
+        </main>
+
+        <footer>
+            <p>Copyright rakhov - 2021</p>
+        </footer>
+    </body>
+</html>
