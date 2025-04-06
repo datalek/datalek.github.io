@@ -36,7 +36,7 @@
 <p>As you can see from the picture we have the following elements:</p>
 <ul>
 <li><strong>Domain</strong>: Is the code to keep decoupled and protected from external entities. Contains types, core logic functions, and ports.</li>
-<li><strong>Ports</strong>: Are the APIs (interfaces) defined within the domain that abstract external dependencies (like databases, emailers).</li>
+<li><strong>Ports</strong>: Are the APIs (interfaces) defined within the domain that abstract external dependencies or the moving parts (like databases, emailers).</li>
 <li><strong>Adapters</strong>: Are the concrete implementations of a port, often tied to a specific technology (e.g., Express, DynamoDB, SES).</li>
 </ul>
 <p>Some important notes:</p>
@@ -45,9 +45,10 @@
 <li>An <strong>Adapter</strong> exists only to implement a <strong>Port</strong>.</li>
 <li>The structure enhances <strong>testability</strong>, as adapters implementing specific ports can easily be replaced with mocks or test doubles.</li>
 <li>Dependencies flow inwards: <strong>Adapters</strong> depend on <strong>Domain Ports</strong>, but the <strong>Domain</strong> must not depend on any specific <strong>Adapter</strong>.</li>
+<li>Dependencies are passed using <code>Env</code> pattern, making dependency injection explicit and type-safe.</li>
 </ul>
 <h3 id="example">Example</h3>
-<p>Imagine a service that manages users, groups and permissions. This is the structure it could have:</p>
+<p>Imagine a service that manages users. This is the structure it could have:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">src</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> adapters</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">│  </span> ├── aws</span>
@@ -67,16 +68,18 @@
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> config.ts</span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> main.ts</span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    </span></code></pre></div>
-<p>As you can see <strong>Adapters</strong> are organized by technology first, then potentially by the port they implement. I found this structure coherent with the aims of adapters (create an implementation for a port or a way to interact with it using a <em>specific technology</em>). Moreover, it is super easy to find the right collocation for a new adapter.</p>
-<p><strong>Domain</strong> is simple: each file contains related types, functions (including use cases), and the ports needed by those functions. Use-cases are simply exported functions within the domain files (like <code>registerUser</code> below).</p>
-<p>The <strong>config</strong> and <strong>main</strong> file are the glue of the system. The <strong>main</strong> file is the entry-point of the system, and it initializes all the adapters needed and wires them together. The <strong>config</strong> file typically handles loading and providing configuration values (like API keys, database connection details) needed by adapters during initialization in `main.ts</p>
+<p><strong>Adapters</strong> are organized by technology first, then potentially by the port they implement. I found this structure coherent with the aims of adapters (create an implementation for a port or a way to interact with it using a <em>specific technology</em>). Moreover, it is super easy to find the right collocation for a new adapter.</p>
+<p><strong>Domain</strong> is simple. Each file contains related types, functions, and the ports needed by those functions.</p>
+<p>The <strong>main</strong> is the glue of the system. It is the entry-point, and acts as the composition root where all the adapters are created and wired to make the system work.</p>
+<p>The <strong>config</strong> file handles loading and providing configuration values (like API keys, database connection details) needed by adapters during initialization in <code>main</code>.</p>
 <h4 id="and-the-missing-parts-of-ports-and-adapters">And the missing parts of Ports and Adapters?</h4>
 <p>As you already noted there is no explicit <code>use-cases</code> folder and no distinction between primary/secondary ports and adapters. Why?</p>
-<ul>
-<li><strong>Use Cases Folder:</strong> I did not find a consistent advantage in keeping use cases in a separate folder away from the domain types and ports they operate on, especially in moderately sized applications. It often felt like premature complexity. If one domain file becomes too complex, it can then be split as needed. For many projects, placing the use case function directly in the relevant domain file (e.g., <code>registerUser</code> within <code>users.ts</code>) reduced boilerplate and kept related logic physically closer, improving discoverability.</li>
-<li><strong>Primary/Secondary Distinction:</strong> While conceptually useful, the formal distinction rarely impacted the actual implementation structure in a meaningful way for my projects. The direction of interaction (driving vs. driven) was usually clear from the context (e.g., an HTTP handler <em>drives</em> the application, a database repository <em>is driven by</em> the application). Omitting the labels simplified the vocabulary without losing practical clarity.</li>
-</ul>
-<p>This approach prioritizes simplicity and reduces ceremony, which aligns with the “Simple is beautiful” principle.</p>
+<h5 id="use-cases-folder">Use Cases Folder</h5>
+<p>I keep use-cases inside the domain, they are functions of the domain. I did not find a consistent advantage in keeping use cases in a separate folder away from the domain types and ports they operate on, especially in moderately sized applications. It often felt like premature complexity.</p>
+<p>If one domain file becomes too complex, it can then be split as needed. For many projects, placing the use case function directly in the relevant domain file (e.g., <code>registerUser</code> within <code>users.ts</code>) reduced boilerplate and kept related logic physically closer, improving discoverability.</p>
+<h5 id="primarysecondary-distinction">Primary/Secondary Distinction</h5>
+<p>The formal distinction rarely impacted the actual implementation structure in a meaningful way for my projects. The direction of interaction (driving vs. driven) was usually clear from the context (e.g., an HTTP handler <em>drives</em> the application, a database repository <em>is driven by</em> the application). Omitting the labels simplified the vocabulary without losing practical clarity.</p>
+<p>This approach prioritizes simplicity and reduces ceremony, which aligns with the <strong>Simple is beautiful</strong> principle.</p>
 <h4 id="domain-code">Domain code</h4>
 <div class="sourceCode" id="cb2"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// file src/domain/users.ts</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { EmailEnv } from <span class="st">'./email.js'</span><span class="op">;</span></span>
