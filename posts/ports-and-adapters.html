@@ -34,7 +34,8 @@
 <p>A <strong>port</strong> is a protocol about how external entities may interact with the application, the word “port” recalls the “ports” in an operating system. It can be represented using an interface or a typeclass.</p>
 <p>An <strong>adapter</strong> is a component that connects the port with the external entity, in other words, translates the port’s protocol to the protocol that the external entity understands.</p>
 <figure>
-<img src="../images/2-ports-and-adapters.png#responsive" title="Figure 1" alt="Figure 1: Ports and Adapters" /><figcaption aria-hidden="true">Figure 1: Ports and Adapters</figcaption>
+<img src="../images/2-ports-and-adapters.png#responsive" title="Figure 1" alt="Figure 1: Ports and Adapters" />
+<figcaption aria-hidden="true">Figure 1: Ports and Adapters</figcaption>
 </figure>
 <p>A <strong>port</strong> can have more than one <strong>adapter</strong> and the <strong>Dependency Inversion Principle</strong> should be always honored, which means: the adapter imports the port.</p>
 <p>Although at architectural level all ports and adapters are fundamentally similar, in implementation they can be categorized into two different groups: <strong>primary</strong> (or <strong>driving</strong>) and <strong>secondary</strong> (or <strong>driven</strong>). The distinction between them lies in who triggers or is in charge of the conversation. If the adapter “serves” an actor that drives the application it is a primary adapter, otherwise, if it “serves” an actor that is driven by the application it is a secondary adapter.</p>
@@ -69,16 +70,16 @@
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> ...</span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    </span></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// file: src/domain/users/UserRepository.ts</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="op">*</span> <span class="im">as</span> TE from <span class="st">&quot;fp-ts/TaskEither&quot;</span><span class="op">;</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { User<span class="op">,</span> UserDefinition } from <span class="st">&quot;./types&quot;</span><span class="op">;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="op">*</span> <span class="im">as</span> TE <span class="im">from</span> <span class="st">&quot;fp-ts/TaskEither&quot;</span><span class="op">;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { User<span class="op">,</span> UserDefinition } <span class="im">from</span> <span class="st">&quot;./types&quot;</span><span class="op">;</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>export interface UserRepository {</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="kw">interface</span> UserRepository {</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  insert<span class="op">:</span> (definition<span class="op">:</span> UserDefinition) <span class="kw">=&gt;</span> TE<span class="op">.</span><span class="at">TaskEither</span><span class="op">&lt;</span>Error<span class="op">,</span> User<span class="op">&gt;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  insert<span class="op">:</span> (definition<span class="op">:</span> UserDefinition) <span class="kw">=&gt;</span> TE<span class="op">.</span><span class="at">TaskEither</span><span class="op">&lt;</span><span class="bu">Error</span><span class="op">,</span> User<span class="op">&gt;</span></span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// file: src/domain/users/types.ts</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>interface UserIdBrand {</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> UserIdBrand {</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">readonly</span> UserId<span class="op">:</span> unique <span class="dt">symbol</span><span class="op">;</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
@@ -102,10 +103,10 @@
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="ex">└──</span> RegisterUserUseCase.ts</span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    </span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// file: src/useCases/RegisterUserUseCase.ts</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="op">*</span> <span class="im">as</span> TE from <span class="st">&quot;fp-ts/TaskEither&quot;</span><span class="op">;</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { GenericError<span class="op">,</span> InvalidInput<span class="op">,</span> makeInvalidInput } from <span class="st">&quot;../domain/DomainError&quot;</span><span class="op">;</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { User<span class="op">,</span> UserDefinition } from <span class="st">&quot;../domain/users/types&quot;</span><span class="op">;</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { UserRepository } from <span class="st">&quot;../domain/users/UserRepository&quot;</span><span class="op">;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="op">*</span> <span class="im">as</span> TE <span class="im">from</span> <span class="st">&quot;fp-ts/TaskEither&quot;</span><span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { GenericError<span class="op">,</span> InvalidInput<span class="op">,</span> makeInvalidInput } <span class="im">from</span> <span class="st">&quot;../domain/DomainError&quot;</span><span class="op">;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { User<span class="op">,</span> UserDefinition } <span class="im">from</span> <span class="st">&quot;../domain/users/types&quot;</span><span class="op">;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { UserRepository } <span class="im">from</span> <span class="st">&quot;../domain/users/UserRepository&quot;</span><span class="op">;</span></span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> RegisterUserError <span class="op">=</span></span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> GenericError</span>
@@ -115,10 +116,10 @@
 <span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  (definition<span class="op">:</span> UserDefinition) <span class="kw">=&gt;</span></span>
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  TE<span class="op">.</span><span class="at">TaskEither</span><span class="op">&lt;</span>RegisterUserError<span class="op">,</span> User<span class="op">&gt;</span></span>
 <span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>export const RegisterUserUseCase <span class="op">=</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="kw">const</span> RegisterUserUseCase <span class="op">=</span></span>
 <span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  (userRepository<span class="op">:</span> UserRepository)<span class="op">:</span> RegisterUserUseCase <span class="kw">=&gt;</span></span>
 <span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  (definition) <span class="kw">=&gt;</span> {</span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    return TE<span class="op">.</span><span class="fu">left</span>(<span class="fu">makeInvalidInput</span>(<span class="st">&quot;Invalid&quot;</span>))</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> TE<span class="op">.</span><span class="fu">left</span>(<span class="fu">makeInvalidInput</span>(<span class="st">&quot;Invalid&quot;</span>))</span>
 <span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <h4 id="adapters">Adapters</h4>
 <p>The adapters folder contains the implementation of the <strong>primary</strong> and <strong>secondary</strong> (also known as <strong>driving</strong> and <strong>driven</strong>) ports. Most of the time I group them in folders based on the technology used to implement them.</p>
@@ -139,15 +140,15 @@
 <h4 id="config-and-main-files">Config and Main files</h4>
 <p>The configuration of the system is inside the <code>config</code> file on the top level, it usually defines the configuration composing the specific-configuration of each adapter and provides a parsing function to <em>create</em> a valid <code>Config</code> from environment variables.</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">// file: src/config.ts</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="op">*</span> <span class="im">as</span> E from <span class="st">&quot;fp-ts/Either&quot;</span><span class="op">;</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { HttpConfig } from <span class="st">&quot;./adapters/http/application&quot;</span><span class="op">;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="op">*</span> <span class="im">as</span> <span class="cn">E</span> <span class="im">from</span> <span class="st">&quot;fp-ts/Either&quot;</span><span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { HttpConfig } <span class="im">from</span> <span class="st">&quot;./adapters/http/application&quot;</span><span class="op">;</span></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="im">export type</span> Config <span class="op">=</span> {</span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  server<span class="op">:</span> HttpConfig</span>
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>export const parseConfig <span class="op">=</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  (envs<span class="op">:</span> <span class="bu">Record</span><span class="op">&lt;</span><span class="dt">string</span><span class="op">,</span> <span class="dt">undefined</span> <span class="op">|</span> <span class="dt">string</span><span class="op">&gt;</span>)<span class="op">:</span> E<span class="op">.</span><span class="at">Either</span><span class="op">&lt;</span><span class="dt">string</span><span class="op">,</span> Config<span class="op">&gt;</span> <span class="kw">=&gt;</span> {</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="kw">const</span> parseConfig <span class="op">=</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  (envs<span class="op">:</span> <span class="bu">Record</span><span class="op">&lt;</span><span class="dt">string</span><span class="op">,</span> <span class="dt">undefined</span> <span class="op">|</span> <span class="dt">string</span><span class="op">&gt;</span>)<span class="op">:</span> <span class="cn">E</span><span class="op">.</span><span class="at">Either</span><span class="op">&lt;</span><span class="dt">string</span><span class="op">,</span> Config<span class="op">&gt;</span> <span class="kw">=&gt;</span> {</span>
 <span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span></span>
 <span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  }</span></code></pre></div>
 <p>The <code>main</code> file is the entry-point of the application, there all the modules are instantiated and composed to produce the whole application functionalities.</p></div>
